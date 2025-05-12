@@ -80,10 +80,10 @@ class DeepNeuralNetwork:
     def forward_prop(self, X):
         """ Forward propagation """
         self.cache["A0"] = X
-        for i in range(1, self.L+1):
-            W = self.weights['W'+str(i)]
-            b = self.weights['b'+str(i)]
-            A = self.cache['A'+str(i - 1)]
+        for i in range(1, self.L + 1):
+            W = self.weights['W' + str(i)]
+            b = self.weights['b' + str(i)]
+            A = self.cache['A' + str(i - 1)]
             z = np.matmul(W, A) + b
             if i != self.L:
                 if self.activation == 'sig':
@@ -92,8 +92,8 @@ class DeepNeuralNetwork:
                     A = np.tanh(z)  # tanh function
             else:
                 A = np.exp(z) / np.sum(np.exp(z), axis=0)  # softmax function
-            self.cache["A"+str(i)] = A
-        return self.cache["A"+str(i)], self.cache
+            self.cache["A" + str(i)] = A
+        return self.cache["A" + str(i)], self.cache
 
     def cost(self, Y, A):
         """ Calculate the cost of the Neural Network \
@@ -198,7 +198,7 @@ class DeepNeuralNetwork:
             self.gradient_descent(Y, self.cache, alpha)
             if verbose and i % step == 0:
 
-                cost = self.cost(Y, self.cache["A"+str(self.L)])
+                cost = self.cost(Y, self.cache["A" + str(self.L)])
                 costs.append(cost)
                 print('Cost after {} iterations: {}'.format(i, cost))
         if graph:
