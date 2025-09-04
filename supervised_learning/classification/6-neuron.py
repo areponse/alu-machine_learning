@@ -101,7 +101,7 @@ class Neuron:
         """
         dz = A - Y
         m = X.shape[1]
-        dw = (1 / m) * np.matmul(dz, X.T)
+        dw = (1/m) * np.matmul(dz, X.T)
         db = np.mean(dz)
         self.__W -= alpha * dw
         self.__b -= alpha * db

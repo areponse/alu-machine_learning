@@ -73,17 +73,17 @@ class DeepNeuralNetwork:
         """
         self.cache["A0"] = X
         # print(self.cache)
-        for i in range(1, self.L + 1):
+        for i in range(1, self.L+1):
             # extract values
-            W = self.weights['W' + str(i)]
-            b = self.weights['b' + str(i)]
-            A = self.cache['A' + str(i - 1)]
+            W = self.weights['W'+str(i)]
+            b = self.weights['b'+str(i)]
+            A = self.cache['A'+str(i - 1)]
             # do forward propagation
             z = np.matmul(W, A) + b
             sigmoid = 1 / (1 + np.exp(-z))  # this is the output
             # store output to the cache
-            self.cache["A" + str(i)] = sigmoid
-        return self.cache["A" + str(i)], self.cache
+            self.cache["A"+str(i)] = sigmoid
+        return self.cache["A"+str(i)], self.cache
 
     def cost(self, Y, A):
         """ Calculate the cost of the Neural Network.
@@ -124,13 +124,10 @@ class DeepNeuralNetwork:
             alpha (float): learning rate
         """
         m = Y.shape[1]
-
         for i in range(self.L, 0, -1):
-
             A_prev = cache["A" + str(i - 1)]
             A = cache["A" + str(i)]
             W = self.__weights["W" + str(i)]
-
             if i == self.__L:
                 dz = A - Y
             else:

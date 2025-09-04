@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
-'''
-    Train the model
-'''
-
+""" train"""
 import tensorflow as tf
 
 
 def create_train_op(loss, alpha):
-    '''
-        that creates the training
-        operation for the network:
-    '''
+    """ training operation"""
     return tf.train.GradientDescentOptimizer(alpha).minimize(loss)
