@@ -1,118 +1,78 @@
 #!/usr/bin/env python3
-""" defines Binomial class that represents binomial distribution """
+
+
+"""Binomial class module for Binomial distribution calculations """
 
 
 class Binomial:
-    """
-    class that represents Binomial distribution
-
-    class constructor:
-        def __init__(self, data=None, n=1, p=0.5)
-
-    instance attributes:
-        n [int]: the number of Bernoilli trials
-        p [float]: the probability of a success
-
-    instance methods:
-        def pmf(self, k): calculates PMF for given number of successes
-        def cdf(self, k): calculates CDF for given number of successes
-    """
+    """Binomial class"""
 
     def __init__(self, data=None, n=1, p=0.5):
-        """
-        class constructor
+        """_summary_
 
-        parameters:
-            data [list]: data to be used to estimate the distibution
-            n [int]: the number of Bernoilli trials
-            p [float]: the probability of a success
+        Args:
+            data (_type_, optional): _description_. Defaults to None.
+            n (int, optional): _description_. Defaults to 1.
+            p (float, optional): _description_. Defaults to 0.5.
 
-        Sets the instance attributes n and p
-        If data is not given:
-            Use the given n and p
-            Raise ValueError if n is not positive value
-            Raise ValueError if p is not a valid probability
-        If data is given:
-            Calculate n and p from data, rounding n to nearest int
-            Raise TypeError if data is not a list
-            Raise ValueError if data does not contain at least two data points
+        Raises:
+            ValueError: _description_
+            ValueError: _description_
+            TypeError: _description_
+            ValueError: _description_
         """
         if data is None:
-            if n < 1:
+            if n <= 0:
                 raise ValueError("n must be a positive value")
-            else:
-                self.n = n
             if p <= 0 or p >= 1:
                 raise ValueError("p must be greater than 0 and less than 1")
-            else:
-                self.p = p
+            self.n = int(n)
+            self.p = float(p)
         else:
-            if type(data) is not list:
+            if type(data) != list:
                 raise TypeError("data must be a list")
-            elif len(data) < 2:
+            if len(data) < 2:
                 raise ValueError("data must contain multiple values")
-            else:
-                mean = float(sum(data) / len(data))
-                summation = 0
-                for x in data:
-                    summation += ((x - mean) ** 2)
-                variance = (summation / len(data))
-                q = variance / mean
-                p = (1 - q)
-                n = round(mean / p)
-                p = float(mean / n)
-                self.n = n
-                self.p = p
+            mean = float(sum(data) / len(data))
+            var = float((sum(map(lambda n: pow(n - mean,
+                        2), data)) / len(data)))
+            self.p = - (var / mean) + 1
+            self.n = round(mean / self.p)
+            self.p = mean / self.n
+
+    def factorial(self, k):
+        """ Find factorial of a number """
+        result = 1
+        for i in range(1, k+1):
+            result *= i
+        return result
 
     def pmf(self, k):
-        """
-        calculates the value of the PMF for a given number of successes
+        """ Calculates the value of the PMF for a given number of "successes."
 
-        parameters:
-            k [int]: number of successes
-                If k is not an int, convert it to int
-                If k is out of range, return 0
-
-        return:
-            the PMF value for k
+        Args:
+            k (int): number of "successes"
         """
-        if type(k) is not int:
+        if not isinstance(k, int):
             k = int(k)
         if k < 0:
             return 0
-        p = self.p
-        n = self.n
-        q = (1 - p)
-        n_factorial = 1
-        for i in range(n):
-            n_factorial *= (i + 1)
-        k_factorial = 1
-        for i in range(k):
-            k_factorial *= (i + 1)
-        nk_factorial = 1
-        for i in range(n - k):
-            nk_factorial *= (i + 1)
-        binomial_co = n_factorial / (k_factorial * nk_factorial)
-        pmf = binomial_co * (p ** k) * (q ** (n - k))
-        return pmf
+
+        n_fact = self.factorial(self.n)
+        k_fact = self.factorial(k)
+        n_k_fact = self.factorial(self.n - k)
+        return (n_fact / (k_fact * n_k_fact)) * \
+            (self.p ** k) * ((1 - self.p) ** (self.n - k))
 
     def cdf(self, k):
-        """
-        calculates the value of the CDF for a given number of successes
+        """Calculates the value of the CDF for a given number of "successes."
 
-        parameters:
-            k [int]: number of successes
-                If k is not an int, convert it to int
-                If k is out of range, return 0
-
-        return:
-            the CDF value for k
+        Args:
+            k (int): is the number of successes.
         """
-        if type(k) is not int:
+
+        if not isinstance(k, int):
             k = int(k)
         if k < 0:
             return 0
-        cdf = 0
-        for i in range(k + 1):
-            cdf += self.pmf(i)
-        return cdf
+        return sum([self.pmf(i) for i in range(0, k+1)])

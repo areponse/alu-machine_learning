@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-"""Function that calculates a correlation matrix"""
-
+"""mulitvaritive probability"""
 import numpy as np
 
 
 def correlation(C):
-    """Function calculates a correlation matrix"""
-    if type(C) is not np.ndarray:
-        raise TypeError("C must be a numpy.ndarray")
-    if len(C.shape) != 2:
-        raise ValueError("C must be a 2D square matrix")
-    if C.shape[0] != C.shape[1]:
-        raise ValueError("C must be a 2D square matrix")
-    v = np.diag(1 / np.sqrt(np.diag(C)))
-    CR = np.matmul(np.matmul(v, C), v)
-    return CR
+    """calculates a correlation matrix"""
+    if not isinstance(C, np.ndarray):
+        raise TypeError('C must be a numpy.ndarray')
+    if len(C.shape) != 2 or C.shape[0] != C.shape[1]:
+        raise ValueError('C must be a 2D square matrix')
+    var_values = np.diag(np.sqrt(np.diag(C)))
+    new = var_values / C
+    cor = new @ C @ new
+    return cor

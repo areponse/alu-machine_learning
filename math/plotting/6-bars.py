@@ -13,7 +13,7 @@ labels = ["apples","bananas","oranges","peaches"]
 fig, axs = plt.subplots()
 
 # Initialize bottom array to stack bars on top of each other
-bottom = np.zeros(3)
+bottom = np.random.randint(3)
 
 # Iterate through each row in the fruit array (each represents a different boolean/species group)
 for i, weight_count in enumerate(fruit):
