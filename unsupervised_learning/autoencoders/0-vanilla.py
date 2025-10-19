@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-Defines function that creates a vanilla autoencoder
+    A function def autoencoder(
+        input_dims, hidden_layers, latent_dims
+    ):
+    that creates an autoencoder:
 """
 
 
@@ -8,30 +11,9 @@ import tensorflow.keras as keras
 
 
 def autoencoder(input_dims, hidden_layers, latent_dims):
-    """
-    Creates a "vanilla" autoencoder
-
-    parameters:
-        input_dims [int]:
-            contains the dimensions of the model input
-        hidden_layers [list of ints]:
-            contains the number of nodes for each hidden layer in the encoder
-                the hidden layers should be reversed for the decoder
-        latent_dims [int]:
-            contains the dimensions of the latent space representation
-
-    All layers should use relu activation except for last layer
-    Last layer should use sigmoid activation
-    Autoencoder model should be compiled with Adam optimization
-        and binary cross-entropy loss
-
-    returns:
-        encoder, decoder, auto
-            encoder [model]: the encoder model
-            decoder [model]: the decoder model
-            auto [model]: full autoencoder model
-                compiled with adam optimization and binary cross-entropy loss
-    """
+    '''
+        autoencoder
+    '''
     if type(input_dims) is not int:
         raise TypeError(
             "input_dims must be an int containing dimensions of model input")
@@ -45,7 +27,6 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
     if type(latent_dims) is not int:
         raise TypeError("latent_dims must be an int containing dimensions of \
         latent space representation")
-
     # encoder
     encoder_inputs = keras.Input(shape=(input_dims,))
     encoder_value = encoder_inputs
@@ -57,7 +38,6 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
                                               activation='relu')
     encoder_outputs = encoder_output_layer(encoder_value)
     encoder = keras.Model(inputs=encoder_inputs, outputs=encoder_outputs)
-
     # decoder
     decoder_inputs = keras.Input(shape=(latent_dims,))
     decoder_value = decoder_inputs
@@ -69,7 +49,6 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
                                               activation='sigmoid')
     decoder_outputs = decoder_output_layer(decoder_value)
     decoder = keras.Model(inputs=decoder_inputs, outputs=decoder_outputs)
-
     # autoencoder
     inputs = encoder_inputs
     auto = keras.Model(inputs=inputs, outputs=decoder(encoder(inputs)))

@@ -1,2 +1,1 @@
-# Dimentionality Reduction
--
+ dimensionality_reduction 
