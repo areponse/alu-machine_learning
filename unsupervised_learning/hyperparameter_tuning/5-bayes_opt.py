@@ -1,140 +1,87 @@
 #!/usr/bin/env python3
 """
-Creates class that performs Bayesian optimization
-on a noiseless 1D Gaussian process
+5. Bayesian Optimization
 """
-
-
-from scipy.stats import norm
 import numpy as np
+from scipy.stats import norm
 GP = __import__('2-gp').GaussianProcess
 
 
 class BayesianOptimization:
     """
     Performs Bayesian optimization on a noiseless 1D Gaussian process
-
-    class constructor:
-        def __init__(self, f, X_init, Y_init, bounds, ac_samples, l=1,
-                     sigma_f=1, xsi=0.01, minimize=True)
-
-
-    public instance attributes:
-        f: the black box function
-        gp: an instance of the class GaussianProcess
-        X_s [numpy.ndarray of shape (ac_samples, 1)]:
-            containing all acquisition sample points,
-                evenly spaced between min and max
-            ac_samples: number of samples
-        xsi: the exploration-exploitation factor
-        minimize [boolean]: for minimization versus maximization
-
-    public instance methods:
-        def acquisition(self):
-            calculates the next best sample location
-        def optimize(self, iterations=100):
-            optimizes the black-box function
     """
+
     def __init__(self, f, X_init, Y_init, bounds, ac_samples, l=1,
                  sigma_f=1, xsi=0.01, minimize=True):
         """
         Class constructor
-
-        parameters:
-            f [function]:
-                the black-box function to be optimized
-            X_init [numpy.ndarray of shape (t, 1)]:
-                representing the inputs sampled with the black-box function
-                t: number of samples
-            Y_init [numpy.ndarry of shape (t, 1)]:
-                representing outputs of the black-box function for each input
-            bounds [tuple of (min, max)]:
-                representing the bounds of the space to find the optimal point
-            ac_samples [int]:
-                number of samples that should be analyzed during acquisition
-            l [int or float]:
-                length parameter for the kernel
-            sigma_f [int or float]:
-                standard deviation given to output of the black-box function
-            xsi [float]:
-                the exploration-exploitation factor for acquisition
-            minimize [boolean]:
-                determines if optimization should be performed for min or max
-                True: performed for minimization
-                False: performed for maximization
+        Args:
+            f: black-box function to be optimized
+            X_init: np.ndarray - (t, 1) - inputs already sampled with the
+                black-box function
+            Y_init: np.ndarray - (t, 1) - outputs of the black-box function
+                for each input in X_init
+            bounds: tuple (min, max) - bounds of the space in which to look
+                for the optimal point
+            ac_samples: number of samples that should be analyzed during
+                acquisition
+            l: length parameter for the kernel
+            sigma_f: standard deviation given to the output of the
+                black-box function
+            xsi: exploration-exploitation factor for acquisition
+            minimize: bool determining whether optimization should be
+                performed for minimization (True) or maximization (False)
         """
-        if type(X_init) is not np.ndarray or len(X_init.shape) != 2:
-            raise TypeError("X_init must be numpy.ndarray of shape (t, 1)")
-        t, one = X_init.shape
-        if one != 1:
-            raise TypeError("X_init must be numpy.ndarray of shape (t, 1)")
-        if type(Y_init) is not np.ndarray or len(Y_init.shape) != 2:
-            raise TypeError("Y_init must be numpy.ndarray of shape (t, 1)")
-        t_check, one = Y_init.shape
-        if one != 1 or t_check != t:
-            raise TypeError("Y_init must be numpy.ndarray of shape (t, 1)")
-        if type(bounds) is not tuple or len(bounds) != 2:
-            raise TypeError("bounds must be a tuple of (min, max)")
-        min, max = bounds
-        if type(min) is not int and type(min) is not float:
-            raise TypeError("min in bounds must be int or float")
-        if type(max) is not int and type(max) is not float:
-            raise TypeError("max in bounds must be int or float")
-        if min >= max:
-            raise ValueError("min from bounds must be less than max")
-        if type(l) is not int and type(l) is not float:
-            raise TypeError(
-                "l must be int or float to represent kernel length parameter")
-        if type(sigma_f) is not int and type(sigma_f) is not float:
-            raise TypeError(
-                "sigma_f must be int or float to represent standard deviation")
-        if type(xsi) is not int and type(xsi) is not float:
-            raise TypeError(
-                "xsi must be int or float to represent \
-                exploration-exploitation factor")
-        if type(minimize) is not bool:
-            raise TypeError("minimize must be boolean to indicate if \
-            optimization should be formed for minimization or maximization")
+        MIN, MAX = bounds
+
         self.f = f
-        self.gp = GP(X_init, Y_init, l, sigma_f)
-        self.X_s = X_init
+        self.gp = GP(X_init, Y_init, l=l, sigma_f=sigma_f)
+        self.X_s = np.linspace(MIN, MAX, num=ac_samples)[..., np.newaxis]
         self.xsi = xsi
         self.minimize = minimize
 
     def acquisition(self):
         """
         Calculates the next best sample location
-            using the Expected Improvement acquisition function
-
-        returns:
-            X_next, EI
-            X_next [numpy.ndarray of shape (1,)]:
-                represents the next best sample point
-            EI [numpy.ndarray of shape (ac_samples,)]:
-                contains the expected improvement of each potential sample
+        Uses the Expected Improvement acquisition function
+        Returns: X_next, EI
         """
-        return None, None
+        mu, _ = self.gp.predict(self.gp.X)
+        sample_mu, sigma = self.gp.predict(self.X_s)
+
+        if self.minimize:
+            opt_mu = np.min(mu)
+        else:
+            opt_mu = np.max(mu)
+
+        imp = opt_mu - sample_mu - self.xsi
+        Z = imp / sigma
+        EI = ((imp * norm.cdf(Z)) + (sigma * norm.pdf(Z)))
+        EI[sigma == 0.0] = 0.0
+
+        X_next = self.X_s[np.argmax(EI)]
+
+        return X_next, np.array(EI)
 
     def optimize(self, iterations=100):
         """
         Optimizes the black-box function
+        Args:
+            iterations: maximum number of iterations to perform
 
-        parameters:
-            iterations [int]:
-                the maximum number of iterations to perform
-
-        If the next proposed point is one that has already been sampled,
-            optimization should be stopped early.
-
-        returns:
-            X_opt, Y_opt
-            X_opt [numpy.ndarray of shape (1,)]:
-                representing the optimal point
-            Y_opt [numpy.ndarray of shape (1,)]:
-                representing the optimal function value
+        Returns: X_opt, Y_opt
         """
-        if type(iterations) is not int:
-            raise TypeError("iterations must be an integer")
-        if iterations <= 0:
-            raise ValueError("iterations must be a positive number")
-        return None, None
+        for i in range(iterations):
+            X_next, _ = self.acquisition()
+
+            if X_next in self.gp.X:
+                break
+
+            Y = self.f(X_next)
+            self.gp.update(X_next, Y)
+
+        idx = np.argmin(self.gp.Y)
+        X_opt = self.gp.X[idx]
+        Y_opt = np.array(self.gp.Y[idx])
+        return X_opt, Y_opt
