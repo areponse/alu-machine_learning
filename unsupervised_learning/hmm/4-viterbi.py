@@ -1,67 +1,64 @@
 #!/usr/bin/env python3
+"""
+Defines function that calculates that most likely sequence of hidden states for
+the Hidden Markov Model
+"""
 
-"""
-This module calculates the most likely sequence
-of hidden states for a hidden markov model
-"""
 
 import numpy as np
 
 
 def viterbi(Observation, Emission, Transition, Initial):
     """
-    calculates the most likely sequence
-    of hidden states for a hidden markov model
+    Calculates the most likely sequence of hidden states
+    for the Hidden Markov Model
 
-    Observation - numpy.ndarray (T,) that contains
-    index of the observation
-        - T - number of observations
-    Emission - numpy.ndarray (N, M) containing the
-    emission probability of a specific observation
-        given a hidden state
-        - Emission[i, j] is the probability of observing
-        j given the hidden state i
-        - N is the number of hidden states
-        - M is the number of all possible observations
-    Transition - 2D numpy.ndarray (N, N) containing the
-    transition probabilities
-        - Transition[i, j] is the probability of transitioning
-        from the hidden state i to j
-    Initial - numpy.ndarray (N, 1) containing the probability
-    of starting in a particular hidden state
-    Return:
-    Path, P, or None, None on failure
-        - Path is the a list of length T containing the
-        most likely sequence of hidden states
-        - P is the probability of obtaining the path sequence
+    parameters:
+        Observation [numpy.ndarray of shape (T,)]:
+            contains the index of the observation
+            T: number of observations
+        Emission [numpy.ndarray of shape (N, M)]:
+            contains the emission probability of a specific observation
+                given a hidden state
+            N: number of hidden states
+            M: number of all possible observations
+        Transition [2D numpy.ndarray of shape (N, N)]:
+            contains the transition probabilities
+            Transition[i, j] is the probabilitiy of transitioning
+                from the hidden state i to j
+        Initial [numpy.ndarray of shape (N, 1)]:
+            contains the probability of starting in a particular hidden state
+
+    returns:
+        path, P:
+            path [list of length T]:
+                contains the most likely sequence of hidden states
+            P [float]:
+                the probability of obtaining the path sequence
+        or None, None on failure
     """
-    if type(Observation) is not np.ndarray or len(Observation.shape) != 1:
+    # check that Observation is the correct type and dimension
+    if type(Observation) is not np.ndarray or len(Observation.shape) < 1:
         return None, None
+    # save T from Observation's shape
     T = Observation.shape[0]
+    # check that Emission is the correct type and dimension
     if type(Emission) is not np.ndarray or len(Emission.shape) != 2:
         return None, None
+    # save N and M from Emission's shape
     N, M = Emission.shape
+    # check that Transition is the correct type and dimension
     if type(Transition) is not np.ndarray or len(Transition.shape) != 2:
         return None, None
-    N1, N2 = Transition.shape
-    if N1 != N or N2 != N:
+    # check that Transition's dimensions match N from Emission
+    N_check1, N_check2 = Transition.shape
+    if N_check1 != N or N_check2 != N:
         return None, None
+    # check that Initial is the correct type and dimension
     if type(Initial) is not np.ndarray or len(Initial.shape) != 2:
         return None, None
-    N3, N4 = Initial.shape
-    if N3 != N or N4 != 1:
+    # check that Initial's dimensions match (N, 1)
+    N_check1, one = Initial.shape
+    if N_check1 != N or one != 1:
         return None, None
-    F = np.zeros((N, T))
-    F[:, 0] = Initial.T * Emission[:, Observation[0]]
-    back = np.zeros((N, T))
-    for i in range(1, T):
-        F[:, i] = np.max(
-            F[:, i - 1] * Transition.T * Emission[np.newaxis, :,
-                                                  Observation[i]].T, axis=1)
-        back[:, i] = np.argmax(
-            F[:, i - 1] * Transition.T, axis=1)
-    P = np.max(F[:, -1])
-    Path = [np.argmax(F[:, -1])]
-    for i in range(T - 1, 0, -1):
-        Path.insert(0, int(back[Path[0], i]))
-    return Path, P
+    return None, None

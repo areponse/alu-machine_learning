@@ -1,62 +1,64 @@
 #!/usr/bin/env python3
+"""
+Defines function that performs the backward algorithm for a Hidden Markov Model
+"""
 
-"""
-This module performs the backward algorithm
-for a hidden markov model
-"""
 
 import numpy as np
 
 
 def backward(Observation, Emission, Transition, Initial):
     """
-    This module performs the backward algorithm
-    for a hidden markov model
+    Performs the backward algorithm for a Hidden Markov Model
 
-    Observation - numpy.ndarray (T,) that contains
-    index of the observation
-        - T - number of observations
-    Emission - numpy.ndarray (N, M) containing the
-    emission probability of a specific observation
-        given a hidden state
-        - Emission[i, j] is the probability of observing
-        j given the hidden state i
-        - N is the number of hidden states
-        - M is the number of all possible observations
-    Transition - 2D numpy.ndarray (N, N) containing the
-    transition probabilities
-        - Transition[i, j] is the probability of transitioning
-        from the hidden state i to j
-    Initial - numpy.ndarray (N, 1) containing the probability
-    of starting in a particular hidden state
-    Return:
-    Path, P, B or None, None on failure
-        - P is the likelihood of observations given the model
-        - B is a numpy.ndarray (N, T) containing the backward path
-        probabilities
-        - B[i, j] is the probability of generating the future
-        observations from hidden state i at time j
+    parameters:
+        Observation [numpy.ndarray of shape (T,)]:
+            contains the index of the observation
+            T: number of observations
+        Emission [numpy.ndarray of shape (N, M)]:
+            contains the emission probability of a specific observation
+                given a hidden state
+            N: number of hidden states
+            M: number of all possible observations
+        Transition [2D numpy.ndarray of shape (N, N)]:
+            contains the transition probabilities
+            Transition[i, j] is the probabilitiy of transitioning
+                from the hidden state i to j
+        Initial [numpy.ndarray of shape (N, 1)]:
+            contains the probability of starting in a particular hidden state
+
+    returns:
+        P, B:
+            P [float]:
+                the likelihood of the observations given the model
+            B [a numpy.ndarray of shape (N. T)]:
+                contains the backward path probabilities
+                B[i, j] is the probability of generating future observations
+                    from hidden state i at time j
+        or None, None on failure
     """
-    if type(Observation) is not np.ndarray or len(Observation.shape) != 1:
-        return None, None, None
+    # check that Observation is the correct type and dimension
+    if type(Observation) is not np.ndarray or len(Observation.shape) < 1:
+        return None, None
+    # save T from Observation's shape
     T = Observation.shape[0]
+    # check that Emission is the correct type and dimension
     if type(Emission) is not np.ndarray or len(Emission.shape) != 2:
-        return None, None, None
+        return None, None
+    # save N and M from Emission's shape
     N, M = Emission.shape
+    # check that Transition is the correct type and dimension
     if type(Transition) is not np.ndarray or len(Transition.shape) != 2:
-        return None, None, None
-    N1, N2 = Transition.shape
-    if N1 != N or N2 != N:
-        return None, None, None
+        return None, None
+    # check that Transition's dimensions match N from Emission
+    N_check1, N_check2 = Transition.shape
+    if N_check1 != N or N_check2 != N:
+        return None, None
+    # check that Initial is the correct type and dimension
     if type(Initial) is not np.ndarray or len(Initial.shape) != 2:
-        return None, None, None
-    N3, N4 = Initial.shape
-    if N3 != N or N4 != 1:
-        return None, None, None
-    B = np.zeros((N, T))
-    B[:, T - 1] = 1
-    for i in range(T - 2, -1, -1):
-        B[:, i] = np.dot(Transition, B[:, i + 1] *
-                         Emission[:, Observation[i + 1]])
-    P = np.sum(Initial.T * Emission[:, Observation[0]] * B[:, 0])
-    return P, B
+        return None, None
+    # check that Initial's dimensions match (N, 1)
+    N_check1, one = Initial.shape
+    if N_check1 != N or one != 1:
+        return None, None
+    return None, None
